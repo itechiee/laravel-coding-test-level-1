@@ -62,5 +62,55 @@ class EventSeeder extends Seeder
             'created_at' => Carbon::now(),
             'updated_at' => Carbon::now()
          ]);
+
+         DB::table('events')->insert([
+            'id' => Str::uuid(),
+            'name' => 'Event 6',
+            'slug' => 'event6',
+            'startAt' => Carbon::now(),
+            'endAt' => Carbon::now(),
+            'created_at' => Carbon::now(),
+            'updated_at' => Carbon::now()
+         ]);
+
+         DB::table('events')->insert([
+            'id' => Str::uuid(),
+            'name' => 'Event 7',
+            'slug' => 'event7',
+            'startAt' => Carbon::now(),
+            'endAt' => Carbon::now(),
+            'created_at' => Carbon::now(),
+            'updated_at' => Carbon::now()
+         ]);
+
+         DB::table('events')->insert([
+            'id' => Str::uuid(),
+            'name' => 'Event 8',
+            'slug' => 'event8',
+            'startAt' => Carbon::now(),
+            'endAt' => Carbon::now(),
+            'created_at' => Carbon::now(),
+            'updated_at' => Carbon::now()
+         ]);
+
+         DB::table('events')->insert([
+            'id' => Str::uuid(),
+            'name' => 'Event 9',
+            'slug' => 'event9',
+            'startAt' => Carbon::now(),
+            'endAt' => Carbon::now(),
+            'created_at' => Carbon::now(),
+            'updated_at' => Carbon::now()
+         ]);
+
+         DB::table('events')->insert([
+            'id' => Str::uuid(),
+            'name' => 'Event 10',
+            'slug' => 'event10',
+            'startAt' => Carbon::now(),
+            'endAt' => Carbon::now(),
+            'created_at' => Carbon::now(),
+            'updated_at' => Carbon::now()
+         ]);
     }
 }

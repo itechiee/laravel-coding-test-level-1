@@ -8,6 +8,7 @@ use Validator;
 use App\Event;
 use Carbon\Carbon;
 use Illuminate\Validation\ValidationException;
+use Illuminate\Support\Facades\Redis;
 
 class EventController extends Controller
 {
@@ -96,9 +97,15 @@ class EventController extends Controller
      */
     public function getEventById($id)
     {
-        
-        $event = Event::findOrFail($id);
-        // return response()->json($event);
+        $cachedEvent = Redis::get('event_' . $id);
+
+        if(isset($cachedEvent)) {
+            $event = json_decode($cachedEvent, FALSE);
+        } else {
+            $event = Event::find($id);
+            Redis::set('event_' . $id, $event);
+        }
+
         return view('events.view', [ 'event' => $event]);
     }
 
@@ -145,15 +152,12 @@ class EventController extends Controller
         $event->updated_at = Carbon::now();
 
         if($event->save()) {
+            Redis::del('event_' . $id);
+            Redis::set('event_' . $id, $event);
             return redirect()->back()->with('success', 'Events updated successfully');
         } else {
             return redirect()->back()->with('error', 'Events updated failed');
         }
-        // 'id' => 'required|unique:events,id,'.$id,
-        //         'name' => 'required|max:255',
-        //         'slug'=> 'required|unique:events,slug,'.$event->id,
-        //         'startAt'=> 'required',
-        //         'endAt'=> 'required'
     }
 
     /**
@@ -172,6 +176,7 @@ class EventController extends Controller
             ]);
         }
         $event->delete();
+        Redis::del('event_' . $id);
         return response()->json('Event deleted successfully.');
     }
 
