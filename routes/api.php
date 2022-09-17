@@ -24,7 +24,7 @@ use Illuminate\Support\Facades\Route;
 
 // // });
 
-Route::group(['prefix' => 'v1', 'as' => 'events.'], function ()
+Route::group(['prefix' => 'v1', 'as' => 'api.events.', 'namespace'=>'API'], function ()
 {
     Route::get('events', 'EventController@index')->name('list');
     Route::get('events/active-events', 'EventController@activeEvents')->name('active-events');

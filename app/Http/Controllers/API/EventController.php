@@ -1,13 +1,13 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\API;
 
+use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Validator;
 use App\Event;
 use Carbon\Carbon;
-use Illuminate\Validation\ValidationException;
 
 class EventController extends Controller
 {
@@ -19,7 +19,7 @@ class EventController extends Controller
     public function index()
     {
         $events = Event::get();
-        return view('events.index', [ 'events' => $events]);
+        return response()->json($events);
     }
 
     /**
@@ -40,26 +40,21 @@ class EventController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function create()
+    public function create(Request $request)
     {
-        return view('events.create');
-    }
-
-    /**
-     * Store a newly created resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
-     */
-    public function store(Request $request)
-    {
-
-        $this->validate($request,[
-            'name' => 'required|max:20',
+        $validator = Validator::make($request->all(), [
+            'name' => 'required|max:255',
             'slug'=> 'required|unique:events',
             'startAt'=> 'required',
             'endAt'=> 'required'
-         ]);        
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'error' => 'Error in Request Validation'
+            ]);
+        }
 
         $postData = $request->all();
 
@@ -70,11 +65,33 @@ class EventController extends Controller
             'endAt'=> $postData['endAt']
         ]);
 
-        if($flag) {
-            return redirect()->back()->with('success', 'Events created successfully');
-        } else {
-            return redirect()->back()->with('error', 'Events creation failed');
+        if($flag)
+        {
+            $response = [
+                'success' => true,
+                'message' => 'Event created successfully.'
+            ];
         }
+        else
+        {
+            $response = [
+                'success' => false,
+                'message' => 'Error in creating event.'
+            ];
+        }
+
+        return response()->json($response);
+    }
+
+    /**
+     * Store a newly created resource in storage.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\Response
+     */
+    public function store(Request $request)
+    {
+        //
     }
 
     /**
@@ -97,9 +114,14 @@ class EventController extends Controller
     public function getEventById($id)
     {
         
-        $event = Event::findOrFail($id);
-        // return response()->json($event);
-        return view('events.view', [ 'event' => $event]);
+        $event = Event::find($id);
+        if(!$event) {
+            return response()->json([
+                'success' => false,
+                'error' => 'No event found'
+            ]);
+        }
+        return response()->json($event);
     }
 
     /**
@@ -108,10 +130,57 @@ class EventController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function edit($id)
+    public function edit($id, Request $request)
     {
         $event = Event::find($id);
-        return view('events.edit', [ 'event' => $event]);
+        if(!$event) {
+            return response()->json([
+                'success' => false,
+                'error' => 'No event found'
+            ]);
+        }
+        $input = $request->all();
+        $input['id'] = $id;
+        $validator = Validator::make($input, [
+            'id' => 'required|unique:events,id,'.$id,
+            'name' => 'required|max:255',
+            'slug'=> 'required|unique:events,slug,'.$event->id,
+            'startAt'=> 'required',
+            'endAt'=> 'required'
+        ]);
+        
+
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'error' => $validator->errors()
+            ]);
+        }
+        
+        $event->name = $input['name'];
+        $event->slug = $input['slug'];
+        $event->startAt = $input['startAt'];
+        $event->endAt = $input['endAt'];
+        $event->updated_at = Carbon::now();
+       
+        $flag = $event->save();
+
+        if($flag)
+        {
+            $response = [
+                'success' => true,
+                'message' => 'Event updated successfully.'
+            ];
+        }
+        else
+        {
+            $response = [
+                'success' => false,
+                'message' => 'Error in creating event.'
+            ];
+        }
+
+        return response()->json($response);
     }
 
     /**
@@ -123,37 +192,7 @@ class EventController extends Controller
      */
     public function update(Request $request, $id)
     {
-        $event = Event::find($id);
-        if(!$event) {
-            throw ValidationException::withMessages(['id' => 'invalid id']);
-        }
-        $request->id = $id;
-        
-        $this->validate($request,[
-            'id'            => 'unique:events,id,'.$id,
-            'eventName'     =>  'required|max:20',
-            'eventSlug'     =>  'required|unique:events,slug,'.$event->id,
-            'eventStartAt'  =>  'required',
-            'eventEndAt'    =>  'required'
-         ]);
-        // dd($id, $request->all());
-
-        $event->name = $request->eventName;
-        // $event->slug = $request->eventSlug;
-        $event->startAt = $request->eventStartAt;
-        $event->endAt = $request->eventEndAt;
-        $event->updated_at = Carbon::now();
-
-        if($event->save()) {
-            return redirect()->back()->with('success', 'Events updated successfully');
-        } else {
-            return redirect()->back()->with('error', 'Events updated failed');
-        }
-        // 'id' => 'required|unique:events,id,'.$id,
-        //         'name' => 'required|max:255',
-        //         'slug'=> 'required|unique:events,slug,'.$event->id,
-        //         'startAt'=> 'required',
-        //         'endAt'=> 'required'
+        //
     }
 
     /**
@@ -186,7 +225,7 @@ class EventController extends Controller
         if($event) {
             $validator = Validator::make($input, [
                 'id' => 'required|unique:events,id,'.$id,
-                'name' => 'required|max:20',
+                'name' => 'required|max:255',
                 'slug'=> 'required|unique:events,slug,'.$event->id,
                 'startAt'=> 'required',
                 'endAt'=> 'required'
@@ -221,8 +260,7 @@ class EventController extends Controller
             $flag = Event::updateOrCreate($input);
         }
 
-        if($flag)
-        {
+        if($flag) {
             $response = [
                 'success' => true,
                 'message' => 'Event updated successfully.'
@@ -235,7 +273,7 @@ class EventController extends Controller
                 'message' => 'Error in creating event.'
             ];
         }
-
         return response()->json($response);
     }
+
 }
