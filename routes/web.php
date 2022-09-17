@@ -19,7 +19,7 @@ Route::get('/', function () {
 
 Route::group(['as' => 'web.events.'], function ()
 {
-    Route::get('events/create', 'EventController@create')->name('create');
+    Route::get('events/create', 'EventController@create')->name('create')->middleware('auth');
     Route::get('events', 'EventController@index')->name('list');
     // Route::get('events/active-events', 'EventController@activeEvents')->name('active-events');
     Route::get('events/{id}', 'EventController@getEventById')->name('event-by-id');
@@ -31,3 +31,8 @@ Route::group(['as' => 'web.events.'], function ()
     
     Route::post('events/store', 'EventController@store')->name('store');
 });
+Auth::routes();
+Route::get('logout', '\App\Http\Controllers\Auth\LoginController@logout');
+Route::get('/home', 'HomeController@index')->name('home');
+
+Route::get('/mail', 'EventController@mailSend')->name('mail');
