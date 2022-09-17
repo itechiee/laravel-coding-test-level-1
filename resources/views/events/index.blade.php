@@ -5,15 +5,15 @@
         <div class="col">
             <div class="row">
                 <div class="col">
-                    <!-- <a href="{{ url('events/create') }}" class="btn btn-primary btn-sm"> <i class="bi bi-file-plus"></i> Add Event </a> -->
-
-                    <a  href="{{ url('events/create') }}"  class="btn btn-primary">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="currentColor" class="bi bi-file-plus" viewBox="0 0 18 18">
-                            <path d="M8.5 6a.5.5 0 0 0-1 0v1.5H6a.5.5 0 0 0 0 1h1.5V10a.5.5 0 0 0 1 0V8.5H10a.5.5 0 0 0 0-1H8.5V6z"></path>
-                            <path d="M2 2a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V2zm10-1H4a1 1 0 0 0-1 1v12a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1z"></path>
-                        </svg>
-                        Add Event
-</a>
+                    @auth
+                        <a  href="{{ url('events/create') }}"  class="btn btn-primary">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="currentColor" class="bi bi-file-plus" viewBox="0 0 18 18">
+                                <path d="M8.5 6a.5.5 0 0 0-1 0v1.5H6a.5.5 0 0 0 0 1h1.5V10a.5.5 0 0 0 1 0V8.5H10a.5.5 0 0 0 0-1H8.5V6z"></path>
+                                <path d="M2 2a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V2zm10-1H4a1 1 0 0 0-1 1v12a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1z"></path>
+                            </svg>
+                            Add Event
+                        </a>
+                    @endauth
                 </div>
             </div>
             <table class="table">
@@ -26,7 +26,9 @@
                     <th scope="col">End At</th>
                     <th scope="col">Created At</th>
                     <th scope="col">Updated At</th>
-                    <th scope="col">Action</th>
+                    @auth
+                        <th scope="col">Action</th>
+                    @endauth
                     </tr>
                 </thead>
                 <tbody>
@@ -44,12 +46,13 @@
                             <td>{{ $event['endAt'] }}</td>
                             <td>{{ $event['created_at'] }}</td>
                             <td>{{ $event['updated_at'] }}</td>
+                            @auth
                             <td>
-                                <!-- <button type="button" class="btn btn-primary btn-sm" onclick="openEditEventModal('{{ $event->id }}')" >Edit</button> -->
                                 <a href="{{ url('/events/' . $event->id . '/edit' ) }}" >Edit</a>
                                 &nbsp;
                                 <button type="button" class="btn btn-danger btn-sm" onclick="openDeleteEventModal('{{ $event->id }}')" >Delete</button>
                             </td>
+                            @endauth
                         </tr>
                     @endforeach
                 </tbody>

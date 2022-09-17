@@ -9,6 +9,10 @@ use App\Event;
 use Carbon\Carbon;
 use Illuminate\Validation\ValidationException;
 use Illuminate\Support\Facades\Redis;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\EventMail;
+use Illuminate\Http\Response;
+use Auth;
 
 class EventController extends Controller
 {
@@ -19,7 +23,7 @@ class EventController extends Controller
      */
     public function index()
     {
-        $events = Event::paginate(4);
+        $events = Event::paginate(5);
         return view('events.index', [ 'events' => $events]);
     }
 
@@ -72,6 +76,11 @@ class EventController extends Controller
         ]);
 
         if($flag) {
+            $email = Auth::user()->email;
+            Mail::to($email)->send(new EventMail([
+                'eventName' => $postData['name']
+            ]));
+
             return redirect()->back()->with('success', 'Events created successfully');
         } else {
             return redirect()->back()->with('error', 'Events creation failed');
@@ -242,5 +251,20 @@ class EventController extends Controller
         }
 
         return response()->json($response);
+    }
+
+    public function mailSend() {
+        $email = 'mail@hotmail.com';
+   
+        $mailInfo = [
+            'title' => 'Welcome New User',
+            'url' => 'https://www.google.com'
+        ];
+  
+        Mail::to($email)->send(new EventMail($mailInfo));
+   
+        return response()->json([
+            'message' => 'Mail has sent.'
+        ], Response::HTTP_OK);
     }
 }
